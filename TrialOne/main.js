@@ -11,7 +11,7 @@ class Block {
   }
 
   calculateHash() {
-    return SHA256(this.index + this.previousHash + this.timestamp + JSON.stringify(this.data + this.nonce)).toString();
+    return SHA256(this.index + this.previousHash + this.timestamp + this.nonce + JSON.stringify(this.data)).toString();
   }
 
   mineBlock(difficulty) {
@@ -26,7 +26,7 @@ class Block {
 class Blockchain {
   constructor () {
     this.chain = [this.createGenesisBlock()];
-    this.difficulty = 2;
+    this.difficulty = 3;
   }
 
   createGenesisBlock() {
@@ -45,12 +45,13 @@ class Blockchain {
 
   isChainValid() {
     for (var i = 1; i < this.chain.length; i++) {
-      // console.log(this.chain[i].index);
+      // console.log('\n' + this.chain[i].index);
+      // console.log(this.chain[i].data);
+      // console.log(this.chain[i].hash + '\n' + this.chain[i].calculateHash());
       if (this.chain[i].previousHash != this.chain[i-1].hash) {
         return false;
       }
       if (this.chain[i].hash != this.chain[i].calculateHash()) {
-        // console.log(this.chain[i].hash + '\n' + this.chain[i].calculateHash());
         return false;
       }
     }
@@ -67,7 +68,11 @@ console.log("Mining Block 2...");
 savjeeCoin.addBlock(new Block(2, "11/07/2017", { amount: 10 }));
 // savjeeCoin.addBlock(new Block(3, "11/07/2017", { amount: 20 }));
 
-// savjeeCoin.chain[1].data = {amount: 1000};
+// console.log(savjeeCoin.chain[1].hash);
+savjeeCoin.chain[1].data = {amount: 1000};
+// console.log(savjeeCoin.chain[1].hash);
+// console.log(savjeeCoin.chain[1].calculateHash());
+
 // savjeeCoin.chain[1].hash = savjeeCoin.chain[1].calculateHash();
 //
 // // console.log(savjeeCoin.chain.length);
@@ -79,4 +84,4 @@ savjeeCoin.addBlock(new Block(2, "11/07/2017", { amount: 10 }));
 //   // console.log(savjeeCoin.chain[i].hash + '\n' + savjeeCoin.chain[i].calculateHash() + '\n\n');
 // }
 //
-// console.log(savjeeCoin.isChainValid());
+console.log(savjeeCoin.isChainValid());
