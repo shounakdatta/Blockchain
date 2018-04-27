@@ -85,3 +85,8 @@ savjeeCoin.chain[1].data = {amount: 1000};
 // }
 //
 console.log(savjeeCoin.isChainValid());
+
+// print process.argv
+process.argv.forEach(function (val, index, array) {
+  console.log(index + ': ' + val);
+});
