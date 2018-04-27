@@ -1,15 +1,15 @@
 const SHA256 = require('crypto-js/sha256');
 
 class transactionBlock {
-  constructor (timestamp, data, prevHash = '') {
-    this.timestamp = timestamp;
-    this.previousHash = previousHash;
+  constructor (data, prevHash = '') {
+    this.timestamp = new Date();
+    this.prevHash = prevHash;
     this.hash = '';
     this.nonce = 0;
   }
 
   calculateHash(data) {
-    return SHA256(this.previousHash + this.timestamp + this.nonce + JSON.stringify(data)).toString();
+    return SHA256(this.prevHash + this.timestamp + this.nonce + JSON.stringify(data)).toString();
   }
 
   mineBlock(difficulty) {
@@ -28,7 +28,7 @@ class ledgerChain {
   }
 
   createGenesisBlock() {
-     return new Block(new Date(), "Genesis Block", "0")
+     return new transactionBlock(new Date(), "Genesis Block", "0")
   }
 
   getLatestBlock() {
@@ -36,7 +36,7 @@ class ledgerChain {
   }
 
   addBlock(newBlock) {
-    newBlock.previousHash = this.getLatestBlock().hash;
+    newBlock.prevHash = this.getLatestBlock().hash;
     newBlock.mineBlock(this.difficulty);
     this.chain.push(newBlock);
   }
@@ -50,3 +50,6 @@ let transactionList = [
     'Amount': 100,
   }
 ];
+
+ledgerOne.addBlock(new transactionBlock(transactionList[1]))
+console.log(ledgerOne);
