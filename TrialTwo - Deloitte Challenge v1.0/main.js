@@ -38,7 +38,7 @@ class ledgerChain {
   constructor () {
     this.chain = [this.createGenesisBlock()];
     this.difficulty = 2;
-    this.chainHash = this.calculateChainHash();
+    this.calculateChainHash();
   }
 
   calculateChainHash(test) {
@@ -46,7 +46,7 @@ class ledgerChain {
     for (var i = 0; i < this.chain.length; i++) {
       totalHash += this.chain[i].hash;
     }
-    return totalHash;
+    this.chainHash = totalHash;
   }
 
   createGenesisBlock() {
@@ -61,6 +61,7 @@ class ledgerChain {
     newBlock.prevHash = this.getLatestBlock().hash;
     newBlock.mineBlock(this.difficulty, ledgerNum);
     this.chain.push(newBlock);
+    this.calculateChainHash();
   }
 
   isChainValid() {
@@ -100,8 +101,14 @@ class consolidatedList {
     }
   }
 
-  propagateBlock(ledgerNum, blockNum) {
-
+  addBlock(blockData) {
+    for (var i = 0; i < this.ledgerList.length; i++) {
+      let newBlock = new transactionBlock(JSON.parse(JSON.stringify(blockData)));
+      newBlock.prevHash = this.ledgerList[i].getLatestBlock().hash;
+      newBlock.mineBlock(this.ledgerList[i].difficulty);
+      this.ledgerList[i].chain.push(newBlock);
+      this.ledgerList[i].calculateChainHash();
+    }
   }
 }
 // ----------------------------------------
@@ -110,12 +117,14 @@ class consolidatedList {
 // Blockchain replacement
 function replaceContents(copies, badCopy, goodCopy) {
   copies[badCopy] = new ledgerChain();
+  console.log('Good copy: ' + goodCopy);
 
   for (var i = 0; i < copies[goodCopy].chain.length; i++) {
+    // console.log('\n' + JSON.stringify(copies[2].chain[i].data));
     copies[badCopy].addBlock(new transactionBlock(JSON.parse(JSON.stringify(copies[goodCopy].chain[i].data)), badCopy));
   }
 
-  copies[badCopy].chainHash = copies[badCopy].calculateChainHash();
+  copies[badCopy].calculateChainHash();
 }
 
 // ----------------------------------------
@@ -123,6 +132,8 @@ function replaceContents(copies, badCopy, goodCopy) {
 
 // Temporary Subsidiary Ledgers
 let ledgers = [ledgerOne = new ledgerChain(), ledgerTwo = new ledgerChain(), ledgerThree = new ledgerChain()]
+let ABCcorp = new consolidatedList();
+ABCcorp.addToList(ledgers);
 
 // Temporary Ledger Data
 const transactionList = [
@@ -150,38 +161,36 @@ let ledgerDemerits = [0, 0, 0];
 // BLOCK CREATIONS
 
 for (var i = 0; i < transactionList.length; i++) {
-  ledgerOne.addBlock(new transactionBlock(transactionList[i]), 1);
-  ledgerTwo.addBlock(new transactionBlock(transactionList[i]), 2);
-  ledgerThree.addBlock(new transactionBlock(transactionList[i]), 3);
+  ABCcorp.addBlock(transactionList[i]);
 }
 
 // ----------------------------------------
 // BLOCK DATA TAMPERING
 
 // Illegal Data Change
-ledgerTwo.chain[2].data.Amount = 75;
+ABCcorp.ledgerList[1].chain[2].data.Amount = 75;
 
 // Illegal hash change (Illegal chain validation)
 for (var i = 1; i < ledgerTwo.chain.length; i++) {
-  ledgerTwo.chain[i].hash = '';
-  ledgerTwo.chain[i].prevHash = ledgerTwo.chain[i-1].hash;
-  ledgerTwo.chain[i].mineBlock(ledgerTwo.difficulty);
-  ledgerTwo.chainHash = ledgerTwo.calculateChainHash();
+  ABCcorp.ledgerList[1].chain[i].hash = '';
+  ABCcorp.ledgerList[1].chain[i].prevHash = ledgerTwo.chain[i-1].hash;
+  ABCcorp.ledgerList[1].chain[i].mineBlock(ledgerTwo.difficulty);
+  ABCcorp.ledgerList[1].calculateChainHash();
 }
 
 // ----------------------------------------
 // CHAIN VALIDATION CHECK
 
 // Intra-chain validation
-console.log('Is Chain 1 Valid? ' + ledgerOne.isChainValid());
-console.log('Is Chain 2 Valid? ' + ledgerTwo.isChainValid());
-console.log('Is Chain 3 Valid? ' + ledgerThree.isChainValid());
+console.log('Is Chain 1 Valid? ' + ABCcorp.ledgerList[0].isChainValid());
+console.log('Is Chain 2 Valid? ' + ABCcorp.ledgerList[1].isChainValid());
+console.log('Is Chain 3 Valid? ' + ABCcorp.ledgerList[2].isChainValid());
 
 //  Inter-chain validation
-for (var i = 0; i < ledgers.length; i++) {
-  let currentLedger = ledgers[i];
-  for (var j = 0; j < ledgers.length; j++) {
-    let nextLedger = ledgers[j];
+for (var i = 0; i < ABCcorp.ledgerList.length; i++) {
+  let currentLedger = ABCcorp.ledgerList[i];
+  for (var j = 0; j < ABCcorp.ledgerList.length; j++) {
+    let nextLedger = ABCcorp.ledgerList[j];
     if (currentLedger.chainHash != nextLedger.chainHash) {
       ledgerDemerits[i]++;
       ledgerDemerits[j]++;
@@ -192,21 +201,23 @@ for (var i = 0; i < ledgers.length; i++) {
 // ----------------------------------------
 // FRAUDULENT CHAIN OVERIDE
 
-// Indexes of most fraudulent and safest chains in Temporary Subsidiary Ledgers array
-var maxIndex = ledgerDemerits.indexOf(Math.max(...ledgerDemerits));
-var minIndex = ledgerDemerits.indexOf(Math.min(...ledgerDemerits));
+if (Math.max(...ledgerDemerits) !== 0) {
+  // Indexes of most fraudulent and safest chains in Temporary Subsidiary Ledgers array
+  var maxIndex = ledgerDemerits.indexOf(Math.max(...ledgerDemerits));
+  var minIndex = ledgerDemerits.indexOf(Math.min(...ledgerDemerits));
 
-// Ledger comparison results
-console.log(ledgerDemerits);
-console.log('Flagged Ledger: ' + maxIndex);
+  // Ledger comparison results
+  console.log(ledgerDemerits);
+  console.log('Flagged Ledger: ' + maxIndex);
 
-// Fraudulent ledger contents pre-override
-console.log('\nOriginal Ledger: ');
-console.log(ledgers[maxIndex].viewContents());
+  // Fraudulent ledger contents pre-override
+  console.log('\nOriginal Ledger: ');
+  console.log(ABCcorp.ledgerList[maxIndex].viewContents());
 
-// Fraudulent ledger content override
-replaceContents(ledgers, maxIndex, minIndex);
+  // Fraudulent ledger content override
+  replaceContents(ABCcorp.ledgerList, maxIndex, minIndex);
 
-// Frudulent ledger contents post-override
-console.log('\nCorrect Ledger: ');
-console.log(ledgers[maxIndex].viewContents());
+  // Frudulent ledger contents post-override
+  console.log('\nCorrect Ledger: ');
+  console.log(ABCcorp.ledgerList[maxIndex].viewContents());
+}
