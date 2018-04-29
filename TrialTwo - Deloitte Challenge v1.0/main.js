@@ -165,17 +165,17 @@ for (var i = 0; i < transactionList.length; i++) {
 }
 
 // ----------------------------------------
-// BLOCK DATA TAMPERING
+// BLOCK DATA TAMPERING - can comment out if required
 
 // Illegal Data Change
-ABCcorp.ledgerList[1].chain[2].data.Amount = 75;
+ABCcorp.ledgerList[2].chain[2].data.Amount = 75;
 
 // Illegal hash change (Illegal chain validation)
 for (var i = 1; i < ledgerTwo.chain.length; i++) {
-  ABCcorp.ledgerList[1].chain[i].hash = '';
-  ABCcorp.ledgerList[1].chain[i].prevHash = ledgerTwo.chain[i-1].hash;
-  ABCcorp.ledgerList[1].chain[i].mineBlock(ledgerTwo.difficulty);
-  ABCcorp.ledgerList[1].calculateChainHash();
+  ABCcorp.ledgerList[2].chain[i].hash = '';
+  ABCcorp.ledgerList[2].chain[i].prevHash = ABCcorp.ledgerList[2].chain[i-1].hash;
+  ABCcorp.ledgerList[2].chain[i].mineBlock(ABCcorp.ledgerList[2].difficulty);
+  ABCcorp.ledgerList[2].calculateChainHash();
 }
 
 // ----------------------------------------
@@ -198,16 +198,17 @@ for (var i = 0; i < ABCcorp.ledgerList.length; i++) {
   }
 }
 
+// Indexes of most fraudulent and safest chains in Temporary Subsidiary Ledgers array
+var maxIndex = ledgerDemerits.indexOf(Math.max(...ledgerDemerits));
+var minIndex = ledgerDemerits.indexOf(Math.min(...ledgerDemerits));
+
+// Ledger comparison results
+console.log('Ledger Demerit Points: ' + ledgerDemerits);
+
 // ----------------------------------------
 // FRAUDULENT CHAIN OVERIDE
 
 if (Math.max(...ledgerDemerits) !== 0) {
-  // Indexes of most fraudulent and safest chains in Temporary Subsidiary Ledgers array
-  var maxIndex = ledgerDemerits.indexOf(Math.max(...ledgerDemerits));
-  var minIndex = ledgerDemerits.indexOf(Math.min(...ledgerDemerits));
-
-  // Ledger comparison results
-  console.log(ledgerDemerits);
   console.log('Flagged Ledger: ' + maxIndex);
 
   // Fraudulent ledger contents pre-override
@@ -218,6 +219,6 @@ if (Math.max(...ledgerDemerits) !== 0) {
   replaceContents(ABCcorp.ledgerList, maxIndex, minIndex);
 
   // Frudulent ledger contents post-override
-  console.log('\nCorrect Ledger: ');
+  console.log('\nNew Ledger: ');
   console.log(ABCcorp.ledgerList[maxIndex].viewContents());
 }
