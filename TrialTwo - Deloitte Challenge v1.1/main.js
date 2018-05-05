@@ -103,7 +103,8 @@ class ledgerChain {
 class consolidatedList {
   constructor () {
     this.ledgerList = [];
-    this.validCurrency = ['USD', 'CAD', 'GBP', 'BTC', 'ETH']
+    this.validCurrency = ['USD', 'CAD', 'GBP', 'BTC', 'ETH'];
+
   }
 
   addToList(newLedgers) {
@@ -192,37 +193,37 @@ const transactionList = [
     'From': 'Company A',
     'To': 'Company B',
     'Currency': 'USD',
-    'Amount': 100,
+    'Amount': 1000,
   },
   {
     'From': 'Company A',
     'To': 'Company C',
     'Currency': 'USD',
-    'Amount': 50,
+    'Amount': 5000,
   },
   {
     'From': 'Company B',
     'To': 'Company A',
     'Currency': 'CAD',
-    'Amount': 25,
+    'Amount': 2500,
   },
   {
     'From': 'Company A',
     'To': 'Company  D',
     'Currency': 'CAD',
-    'Amount': 125,
+    'Amount': 12500,
   },
   {
     'From': 'Company A' ,
     'To': 'Company  E',
     'Currency': 'GBP',
-    'Amount': 215,
+    'Amount': 2150,
   },
   {
     'From': 'Company B',
     'To': 'Company  C',
     'Currency': 'GBP',
-    'Amount': 251,
+    'Amount': 25100,
   },
   {
     'From': 'Company B',
