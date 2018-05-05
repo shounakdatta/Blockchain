@@ -42,9 +42,12 @@ class transactionBlock {
 
 // Blockchain class
 class ledgerChain {
-  constructor () {
+  constructor (ledgerName) {
     this.chain = [this.createGenesisBlock()];
     this.difficulty = 1;
+    this.ledgerName = ledgerName;
+    this.currency = 'USD'
+    this.balance = 1000000;
     this.calculateChainHash();
   }
 
@@ -119,6 +122,27 @@ class consolidatedList {
     return false;
   }
 
+  getUSD(currency, amount) {
+    var convertionRate = [1, 0.793, 1.431, 8054.995, 799.77]       //Convertion Rates for USD, CAD, GBP, BTC, and ETH respectively
+
+    for (var i = 0; i < this.validCurrency.length; i++) {
+      if (currency === this.validCurrency[i]) {
+        return (amount*convertionRate[i]);
+      }
+    }
+  }
+
+  performTransaction(i, transData) {
+    if (this.ledgerList[i].ledgerName === transData.From.substring(8,9)) {
+      this.ledgerList[i].balance -= this.getUSD(transData.Currency, transData.Amount);
+      // console.log('New Balance of Ledger ' + this.ledgerList[i].ledgerName + ': ' + this.ledgerList[i].balance + '\n');
+    }
+    if (this.ledgerList[i].ledgerName === transData.To.substring(8,9)) {
+      this.ledgerList[i].balance += this.getUSD(transData.Currency, transData.Amount);
+      // console.log('New Balance of Ledger ' + this.ledgerList[i].ledgerName + ': ' + this.ledgerList[i].balance + '\n');
+    }
+  }
+
   addBlock(blockData) {
     if (this.checkCurrency(blockData)) {
       for (var i = 0; i < this.ledgerList.length; i++) {
@@ -126,6 +150,7 @@ class consolidatedList {
         newBlock.prevHash = this.ledgerList[i].getLatestBlock().hash;
         newBlock.getID(this.ledgerList[i].chain.length);
         newBlock.mineBlock(this.ledgerList[i].difficulty);
+        this.performTransaction(i, blockData);
         this.ledgerList[i].chain.push(newBlock);
         this.ledgerList[i].calculateChainHash();
       }
@@ -157,7 +182,7 @@ function replaceContents(copies, badCopy, goodCopy) {
 // VARIABLES
 
 // Temporary Subsidiary Ledgers
-let ledgers = [ledgerOne = new ledgerChain(), ledgerTwo = new ledgerChain(), ledgerThree = new ledgerChain() ,ledgerFour = new ledgerChain(), ledgerFive = new ledgerChain(), ledgerSix = new ledgerChain(), ledgerSeven = new ledgerChain(), ledgerEight = new ledgerChain(), ledgerNine = new ledgerChain()]
+let ledgers = [ledgerA = new ledgerChain('A'), ledgerB = new ledgerChain('B'), ledgerC = new ledgerChain('C') ,ledgerD = new ledgerChain('D'), ledgerE = new ledgerChain('E'), ledgerF = new ledgerChain('F'), ledgerG = new ledgerChain('G'), ledgerH = new ledgerChain('H'), ledgerI = new ledgerChain('I')];
 let ABCcorp = new consolidatedList();
 ABCcorp.addToList(ledgers);
 
@@ -172,7 +197,7 @@ const transactionList = [
   {
     'From': 'Company A',
     'To': 'Company C',
-    'Currency': 'INR',
+    'Currency': 'USD',
     'Amount': 50,
   },
   {
@@ -203,19 +228,19 @@ const transactionList = [
     'From': 'Company B',
     'To': 'Company  D',
     'Currency': 'BTC',
-    'Amount': 15,
+    'Amount': 1,
   },
   {
     'From': 'Company B',
-    'To': 'Company  E',
+    'To': 'Company  F',
     'Currency': 'BTC',
-    'Amount': 27,
+    'Amount': 2,
   },
   {
     'From': 'Company C',
     'To': 'Company  A',
     'Currency': 'ETH',
-    'Amount': 97,
+    'Amount': 9,
   },
 
 ];
@@ -233,16 +258,16 @@ for (var i = 0; i < transactionList.length; i++) {
 // ----------------------------------------
 // BLOCK DATA TAMPERING - can comment out if required
 
-// // Illegal Data Change
-// ABCcorp.ledgerList[2].chain[2].data.Amount = 75;
-//
-// // Illegal hash change (Illegal chain validation)
-// for (var i = 1; i < ledgerTwo.chain.length; i++) {
-//   ABCcorp.ledgerList[2].chain[i].hash = '';
-//   ABCcorp.ledgerList[2].chain[i].prevHash = ABCcorp.ledgerList[2].chain[i-1].hash;
-//   ABCcorp.ledgerList[2].chain[i].mineBlock(ABCcorp.ledgerList[2].difficulty);
-//   ABCcorp.ledgerList[2].calculateChainHash();
-// }
+// Illegal Data Change
+ABCcorp.ledgerList[2].chain[2].data.Amount = 75;
+
+// Illegal hash change (Illegal chain validation)
+for (var i = 1; i < ABCcorp.ledgerList[2].chain.length; i++) {
+  ABCcorp.ledgerList[2].chain[i].hash = '';
+  ABCcorp.ledgerList[2].chain[i].prevHash = ABCcorp.ledgerList[2].chain[i-1].hash;
+  ABCcorp.ledgerList[2].chain[i].mineBlock(ABCcorp.ledgerList[2].difficulty);
+  ABCcorp.ledgerList[2].calculateChainHash();
+}
 
 // ----------------------------------------
 // CHAIN VALIDATION CHECK
