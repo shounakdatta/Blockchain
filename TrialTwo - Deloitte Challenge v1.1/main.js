@@ -11,7 +11,7 @@ class transactionBlock {
   constructor (data, prevHash = '') {
     this.timestamp = new Date();
     this.prevHash = prevHash;
-    this.id = '00';
+    this.id = '0000';
     this.data = JSON.parse(JSON.stringify(data));
     if (this.data === "Genesis Block") {
       this.hash = this.calculateHash();
@@ -29,7 +29,7 @@ class transactionBlock {
   getID(transNum) {
     var address = this.data.From.substring(8,9);
     var newTransNum = (transNum+1);
-    this.id = address+newTransNum;
+    this.id = address+'000'+newTransNum;
   }
 
   mineBlock(difficulty, ledgerNum) {
@@ -260,14 +260,14 @@ for (var i = 0; i < transactionList.length; i++) {
 // BLOCK DATA TAMPERING - can comment out if required
 
 // Illegal Data Change
-ABCcorp.ledgerList[2].chain[2].data.Amount = 75;
+ABCcorp.ledgerList[5].chain[2].data.Amount = 75;
 
 // Illegal hash change (Illegal chain validation)
-for (var i = 1; i < ABCcorp.ledgerList[2].chain.length; i++) {
-  ABCcorp.ledgerList[2].chain[i].hash = '';
-  ABCcorp.ledgerList[2].chain[i].prevHash = ABCcorp.ledgerList[2].chain[i-1].hash;
-  ABCcorp.ledgerList[2].chain[i].mineBlock(ABCcorp.ledgerList[2].difficulty);
-  ABCcorp.ledgerList[2].calculateChainHash();
+for (var i = 1; i < ABCcorp.ledgerList[5].chain.length; i++) {
+  ABCcorp.ledgerList[5].chain[i].hash = '';
+  ABCcorp.ledgerList[5].chain[i].prevHash = ABCcorp.ledgerList[5].chain[i-1].hash;
+  ABCcorp.ledgerList[5].chain[i].mineBlock(ABCcorp.ledgerList[5].difficulty);
+  ABCcorp.ledgerList[5].calculateChainHash();
 }
 
 // ----------------------------------------
